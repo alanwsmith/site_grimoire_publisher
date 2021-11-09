@@ -1,0 +1,14 @@
+{
+  "name": "site_grimoire_to_site_mover",
+  "version": "1.0.0",
+  "description": "This is what moves files from the grimoire to the site",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}

@@ -73,7 +73,7 @@ files.forEach((filename) => {
       // console.log(outputPath)
 
       // only publish things that match the proper status
-      if (parts.data.status.match(/archive|scratch|draft|published/)) {
+      if (parts.data.status.match(/^(archive|scratch|draft|published)$/)) {
         // Write the file out
         fs.writeFile(outputPath, fileContents, (err) => {
           if (err) throw err

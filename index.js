@@ -21,8 +21,13 @@ const matter = require('gray-matter')
 const inputDir =
   '/Users/alans/workshop/site_content_ksuid_migration_data/06_renamed_files'
 const outputDir = '/Users/alans/workshop/alanwsmith.com/_posts'
+
 const ksuidRedirectsInputFile =
   '/Users/alans/workshop/alanwsmith.com/data/ksuid-redirects-initial.json'
+
+// const ksuidRedirectsInputFile =
+//   '/Users/alans/workshop/alanwsmith.com/data/ksuid-redirects.json'
+
 const ksuidRedirectsOutputFile =
   '/Users/alans/workshop/alanwsmith.com/data/ksuid-redirects.json'
 
@@ -34,6 +39,18 @@ const slugRegex = /[^\w\s]/g
 
 const ksuidRedirects = JSON.parse(fs.readFileSync(ksuidRedirectsInputFile))
 // console.log(ksuidRedirects)
+
+const config = {
+  dev: {
+    nextConfigPath: 'test_data/redirects/next.config.js',
+  },
+
+  prod: {
+    nextConfigPath: '/Users/alans/workshop/alanwsmith.com/next.config.js',
+  },
+}
+
+const currentEnv = 'prod'
 
 files.forEach((filename) => {
   console.log(`Processing: ${filename}`)
@@ -59,7 +76,7 @@ files.forEach((filename) => {
       // Make the slug based off the title frontmatter
       // that has just been updated or has an override
       // in it.
-      const slug =
+      const baseSlug =
         parts.data.id +
         `--` +
         parts.data.title
@@ -70,7 +87,7 @@ files.forEach((filename) => {
       // console.log(slug)
 
       // this is what's used in the referencing
-      const postsSlug = `/posts/${slug}`
+      const urlSlug = `/posts/${baseSlug}`
 
       // Add the slug into the frontmatter
       // TODO: See if you can remove the slug.
@@ -78,7 +95,7 @@ files.forEach((filename) => {
       // parts.data.slug = slug
 
       // Create the output path an assembe the file
-      const outputPath = `${outputDir}/${slug}.mdx`
+      const outputPath = `${outputDir}/${baseSlug}.mdx`
       const fileContents = matter.stringify(parts.content, parts.data)
       // console.log(outputPath)
 
@@ -93,27 +110,22 @@ files.forEach((filename) => {
         // Add the page to the redirects file if it's new
         if (ksuidRedirects.ksuid_redirects[parts.data.id] === undefined) {
           ksuidRedirects.ksuid_redirects[parts.data.id] = {
-            current_slug: slug,
+            current_slug: urlSlug,
             slugs_to_redirect: [],
           }
         }
         // Update if it's changed and push the prior onto the list of
         // slugs to redicts
         else if (
-          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug !==
-          postsSlug
+          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug !== urlSlug
         ) {
           ksuidRedirects.ksuid_redirects[parts.data.id].slugs_to_redirect.push(
             ksuidRedirects.ksuid_redirects[parts.data.id].current_slug
           )
-          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug = postsSlug
+          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug = urlSlug
         }
 
-        // Write out the redirects files
-        fs.writeFileSync(
-          ksuidRedirectsOutputFile,
-          JSON.stringify(ksuidRedirects, null, 2)
-        )
+        // make an object that holds all the necessary redirects
 
         // // Add the data to the rewrites
         // urlRewrites.push({
@@ -125,5 +137,37 @@ files.forEach((filename) => {
   }
 })
 
+// Write out the redirects storage
+fs.writeFileSync(
+  ksuidRedirectsOutputFile,
+  JSON.stringify(ksuidRedirects, null, 2)
+)
+
+const redirectArray = []
+
+for (const ksuid in ksuidRedirects.ksuid_redirects) {
+  console.log(ksuid)
+  destination_slug = ksuidRedirects.ksuid_redirects[ksuid].current_slug
+
+  ksuidRedirects.ksuid_redirects[ksuid].slugs_to_redirect.forEach(
+    (source_slug) => {
+      redirectArray.push({
+        source: source_slug,
+        destination: destination_slug,
+        permanent: true,
+      })
+    }
+  )
+}
+
+configOutput = `module.exports = { async redirects() { return ${JSON.stringify(
+  redirectArray,
+  null,
+  2
+)}}}`
+
+fs.writeFileSync(config[currentEnv].nextConfigPath, configOutput)
+
+// console.log(JSON.stringify(redirectArray, null, 2))
 // console.log(urlRewrites)
 // console.log(JSON.stringify(ksuidRedirects))

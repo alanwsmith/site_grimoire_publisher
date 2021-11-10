@@ -8,17 +8,23 @@
 const fs = require('fs')
 const matter = require('gray-matter')
 
-const inputDir = 'test_data/input'
-const outputDir = 'test_data/output'
-const ksuidRedirectsInputFile = 'test_data/redirects/input.json'
-const ksuidRedirectsOutputFile = 'test_data/redirects/output.json'
+// const inputDir = 'test_data/input'
+// const outputDir = 'test_data/output'
+// const ksuidRedirectsInputFile = 'test_data/redirects/input.json'
+// const ksuidRedirectsOutputFile = 'test_data/redirects/output.json'
 
-// const inputDir =
-//   '/Users/alans/workshop/site_content_ksuid_migration_data/06_renamed_files'
-// const outputDir = '/Users/alans/workshop/alanwsmith.com/_posts'
-// const ksuidRedirectsInputFile =
-//   '/Users/alans/workshop/alanwsmith.com/data/ksuid-redirects.json'
-// const ksuidRedirectsOutputFile = ksuidRedirectsInputFile
+// TODO: Update this so it deletes files before writing into the
+// output directory.
+// TODO: commit the site to git when the update happens.
+//
+//
+const inputDir =
+  '/Users/alans/workshop/site_content_ksuid_migration_data/06_renamed_files'
+const outputDir = '/Users/alans/workshop/alanwsmith.com/_posts'
+const ksuidRedirectsInputFile =
+  '/Users/alans/workshop/alanwsmith.com/data/ksuid-redirects-initial.json'
+const ksuidRedirectsOutputFile =
+  '/Users/alans/workshop/alanwsmith.com/data/ksuid-redirects.json'
 
 const files = fs.readdirSync(inputDir)
 const file_extension = /\.txt$/
@@ -27,9 +33,10 @@ const prefixRegex = /^\w+-\s+/g
 const slugRegex = /[^\w\s]/g
 
 const ksuidRedirects = JSON.parse(fs.readFileSync(ksuidRedirectsInputFile))
-console.log(ksuidRedirects)
+// console.log(ksuidRedirects)
 
 files.forEach((filename) => {
+  console.log(`Processing: ${filename}`)
   if (filename.match(file_extension)) {
     const inputPath = `${inputDir}/${filename}`
     const parts = matter.read(inputPath)
@@ -38,7 +45,7 @@ files.forEach((filename) => {
 
     // Only process if there's an id
     if (parts.data.id) {
-      // console.log(parts.data.id)
+      console.log(`-- Found ID: ${parts.data.id}`)
 
       // Update the title frontmatter if one
       // doesn't already exist (which it shouldn't
@@ -62,6 +69,9 @@ files.forEach((filename) => {
           .toLowerCase()
       // console.log(slug)
 
+      // this is what's used in the referencing
+      const postsSlug = `/posts/${slug}`
+
       // Add the slug into the frontmatter
       // TODO: See if you can remove the slug.
       // I think you should be able to
@@ -80,13 +90,30 @@ files.forEach((filename) => {
           // console.log(`Wrote: ${outputPath}`)
         })
 
-        // Add the thing to the redirects file if it's new
+        // Add the page to the redirects file if it's new
         if (ksuidRedirects.ksuid_redirects[parts.data.id] === undefined) {
           ksuidRedirects.ksuid_redirects[parts.data.id] = {
             current_slug: slug,
             slugs_to_redirect: [],
           }
         }
+        // Update if it's changed and push the prior onto the list of
+        // slugs to redicts
+        else if (
+          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug !==
+          postsSlug
+        ) {
+          ksuidRedirects.ksuid_redirects[parts.data.id].slugs_to_redirect.push(
+            ksuidRedirects.ksuid_redirects[parts.data.id].current_slug
+          )
+          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug = postsSlug
+        }
+
+        // Write out the redirects files
+        fs.writeFileSync(
+          ksuidRedirectsOutputFile,
+          JSON.stringify(ksuidRedirects, null, 2)
+        )
 
         // // Add the data to the rewrites
         // urlRewrites.push({
@@ -99,4 +126,4 @@ files.forEach((filename) => {
 })
 
 // console.log(urlRewrites)
-console.log(ksuidRedirects)
+// console.log(JSON.stringify(ksuidRedirects))

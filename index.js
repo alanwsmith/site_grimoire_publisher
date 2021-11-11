@@ -47,9 +47,12 @@ const config = {
     // TODO: Can probably remove this
     jsonRedirectFile: 'test_data/redirects/legacy_redirects.json',
     ksuidMatcherFile: 'test_data/redirects/ksuid-matcher-file.json',
-    legacySlugsRedirectIdsInputFile: 'legacy-slug-redirect-ids.json',
+    legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
+    legacySlugRedirectOutputFile:
+      'test_data/redirects/legacy-slug-redirects.json',
     // ksuidRedirectsInputFile: '',
     //ksuidRedirectsOutputFile: '',
+    legacySlugsRedirectIdsInputFile: 'old_data/legacy-slug-redirect-ids.json',
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
@@ -58,7 +61,7 @@ const config = {
       '/Users/alans/workshop/alanwsmith.com/data/legacy_redirects.json',
     ksuidMatcherFile:
       '/Users/alans/workshop/alanwsmith.com/data/ksuid-matcher.json',
-    legacySlugsRedirectIdsInputFile: 'legacy-slug-redirect-ids.json',
+    legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
   },
 }
 
@@ -74,20 +77,28 @@ const fileCounts = {
 //////////////////////////////////////////
 // Load in the list of legacy slugs and their matching KSUIDs
 
+const legacySlugMap = JSON.parse(
+  fs.readFileSync(config[currentEnv].legacySlugMapFile)
+)
+
+console.log(legacySlugMap)
+
+// generate the new format for the map of legacy
+// url slugs to ksuids. This can be removed once the
+// tool has been run a few times to verify things
+// are working
 const legacySlugs = {}
 let legacySlugsCounter = 0
-
 const legacySlugRedirectIdsRaw = JSON.parse(
   fs.readFileSync(config[currentEnv].legacySlugsRedirectIdsInputFile)
 )
-
 for (const ksuidKey in legacySlugRedirectIdsRaw['ksuid_redirects']) {
   legacySlugParts =
     legacySlugRedirectIdsRaw['ksuid_redirects'][ksuidKey].current_slug.split(
       '/'
     )
   legacySlug = legacySlugParts[1]
-  legacySlugs[legacySlug] = ksuidKey
+  legacySlugs[ksuidKey] = legacySlug
   legacySlugsCounter += 1
 }
 

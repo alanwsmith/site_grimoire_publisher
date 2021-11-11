@@ -91,6 +91,11 @@ for (const ksuidKey in legacySlugRedirectIdsRaw['ksuid_redirects']) {
   legacySlugsCounter += 1
 }
 
+fs.writeFileSync(
+  'legacy-slug-to-ksuid-map.json',
+  JSON.stringify(legacySlugs, null, 2)
+)
+
 console.log(legacySlugs)
 console.log(legacySlugsCounter)
 

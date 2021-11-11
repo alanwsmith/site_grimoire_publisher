@@ -49,7 +49,7 @@ const config = {
       'test_data/redirects/legacy-slug-redirects.json',
     // ksuidRedirectsInputFile: '',
     //ksuidRedirectsOutputFile: '',
-    legacySlugsRedirectIdsInputFile: 'old_data/legacy-slug-redirect-ids.json',
+    // legacySlugsRedirectIdsInputFile: 'old_data/legacy-slug-redirect-ids.json',
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
@@ -215,7 +215,12 @@ console.log(
   `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
 )
 
-console.log(legacyUrlSlugToKSUIDMap)
+fs.writeFileSync(
+  config[currentEnv].legacySlugRedirectOutputFile,
+  JSON.stringify(legacyUrlSlugToKSUIDMap, null, 2)
+)
+
+// console.log(legacyUrlSlugToKSUIDMap)
 
 // shouldn't need this any more when you have hte
 // json setup for the pages/posts/_middleware

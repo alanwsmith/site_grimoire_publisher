@@ -42,11 +42,11 @@ const ksuidRedirects = JSON.parse(fs.readFileSync(ksuidRedirectsInputFile))
 
 const config = {
   dev: {
-    nextConfigPath: 'test_data/redirects/next.config.js',
+    jsonRedirectFile: 'test_data/redirects/legacy_redirects.json',
   },
-
   prod: {
-    nextConfigPath: '/Users/alans/workshop/alanwsmith.com/next.config.js',
+    jsonRedirectFile:
+      '/Users/alans/workshop/alanwsmith.com/data/legacy_redirects.json',
   },
 }
 
@@ -143,30 +143,24 @@ fs.writeFileSync(
   JSON.stringify(ksuidRedirects, null, 2)
 )
 
-const redirectArray = []
+// const redirectArray = []
+
+const redirectKeys = {}
 
 for (const ksuid in ksuidRedirects.ksuid_redirects) {
   console.log(ksuid)
   destination_slug = ksuidRedirects.ksuid_redirects[ksuid].current_slug
-
   ksuidRedirects.ksuid_redirects[ksuid].slugs_to_redirect.forEach(
     (source_slug) => {
-      redirectArray.push({
-        source: source_slug,
-        destination: destination_slug,
-        permanent: true,
-      })
+      redirectKeys[source_slug.substring(1)] = destination_slug
+      // redirectArray.push(tmpObject)
     }
   )
 }
 
-configOutput = `module.exports = { async redirects() { return ${JSON.stringify(
-  redirectArray,
-  null,
-  2
-)}}}`
+configOutput = JSON.stringify(redirectKeys, null, 2)
 
-fs.writeFileSync(config[currentEnv].nextConfigPath, configOutput)
+fs.writeFileSync(config[currentEnv].jsonRedirectFile, configOutput)
 
 // console.log(JSON.stringify(redirectArray, null, 2))
 // console.log(urlRewrites)

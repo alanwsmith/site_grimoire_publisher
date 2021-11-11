@@ -1,4 +1,4 @@
-module.exports = { async redirects() { return [
+[
   {
     "source": "/first-post-yeah-yeah",
     "destination": "/posts/20eLG89zSnmm--first-post--yeah-yeah",
@@ -7094,4 +7094,4 @@ module.exports = { async redirects() { return [
     "destination": "/posts/20eOhdxLdBXK--convert-a-video-to-black-and-white-in-adobe-premiere",
     "permanent": true
   }
-]}}
+]

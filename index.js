@@ -8,8 +8,6 @@
 const fs = require('fs')
 const matter = require('gray-matter')
 
-// const inputDir = 'test_data/input'
-// const outputDir = 'test_data/output'
 // const ksuidRedirectsInputFile = 'test_data/redirects/input.json'
 // const ksuidRedirectsOutputFile = 'test_data/redirects/output.json'
 
@@ -32,7 +30,6 @@ const matter = require('gray-matter')
 //   '/Users/alans/workshop/alanwsmith.com/data/ksuid-redirects.json'
 
 const file_extension = /\.txt$/
-
 const prefixRegex = /^\w+-\s+/g
 const slugRegex = /[^\w\s]/g
 
@@ -80,37 +77,33 @@ const fileCounts = {
 const legacySlugMap = JSON.parse(
   fs.readFileSync(config[currentEnv].legacySlugMapFile)
 )
-
 console.log(legacySlugMap)
 
-// generate the new format for the map of legacy
-// url slugs to ksuids. This can be removed once the
-// tool has been run a few times to verify things
-// are working
-const legacySlugs = {}
-let legacySlugsCounter = 0
-const legacySlugRedirectIdsRaw = JSON.parse(
-  fs.readFileSync(config[currentEnv].legacySlugsRedirectIdsInputFile)
-)
-for (const ksuidKey in legacySlugRedirectIdsRaw['ksuid_redirects']) {
-  legacySlugParts =
-    legacySlugRedirectIdsRaw['ksuid_redirects'][ksuidKey].current_slug.split(
-      '/'
-    )
-  legacySlug = legacySlugParts[1]
-  legacySlugs[ksuidKey] = legacySlug
-  legacySlugsCounter += 1
-}
-
-fs.writeFileSync(
-  'legacy-slug-to-ksuid-map.json',
-  JSON.stringify(legacySlugs, null, 2)
-)
-
-console.log(legacySlugs)
-console.log(legacySlugsCounter)
-
-// console.log(legacySlugRedirectIdsRaw)
+// // generate the new format for the map of legacy
+// // url slugs to ksuids. This can be removed once the
+// // tool has been run a few times to verify things
+// // are working
+// const legacySlugs = {}
+// let legacySlugsCounter = 0
+// const legacySlugRedirectIdsRaw = JSON.parse(
+//   fs.readFileSync(config[currentEnv].legacySlugsRedirectIdsInputFile)
+// )
+// for (const ksuidKey in legacySlugRedirectIdsRaw['ksuid_redirects']) {
+//   legacySlugParts =
+//     legacySlugRedirectIdsRaw['ksuid_redirects'][ksuidKey].current_slug.split(
+//       '/'
+//     )
+//   legacySlug = legacySlugParts[1]
+//   legacySlugs[ksuidKey] = legacySlug
+//   legacySlugsCounter += 1
+// }
+// fs.writeFileSync(
+//   'legacy-slug-to-ksuid-map.json',
+//   JSON.stringify(legacySlugs, null, 2)
+// )
+// console.log(legacySlugs)
+// console.log(legacySlugsCounter)
+// // console.log(legacySlugRedirectIdsRaw)
 
 ///////////////////////////////////////////////
 // Get the files - this is the full list from the grimoire

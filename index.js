@@ -109,6 +109,10 @@ console.log(legacySlugMap)
 // Get the files - this is the full list from the grimoire
 const files = fs.readdirSync(config[currentEnv].inputDir)
 
+////////////////////////////////////////////
+// Holder for the legacy slug url to new ksuid map
+const legacyUrlSlugToKSUIDMap = {}
+
 /////////////////////////////////////////////
 // Loop through all the files in the grimoire
 files.forEach((filename) => {
@@ -151,6 +155,11 @@ files.forEach((filename) => {
 
       // this is what's used in the referencing
       const urlSlug = `/posts/${baseSlug}`
+
+      // Add the mapping for the legacy URL
+      if (legacySlugMap[parts.data.id]) {
+        legacyUrlSlugToKSUIDMap[legacySlugMap[parts.data.id]] = urlSlug
+      }
 
       // Add the slug into the frontmatter
       // TODO: See if you can remove the slug.
@@ -205,6 +214,8 @@ files.forEach((filename) => {
 console.log(
   `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
 )
+
+console.log(legacyUrlSlugToKSUIDMap)
 
 // shouldn't need this any more when you have hte
 // json setup for the pages/posts/_middleware

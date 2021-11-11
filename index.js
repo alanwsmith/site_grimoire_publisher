@@ -42,8 +42,8 @@ const config = {
     inputDir: 'test_data/input',
     outputDir: 'test_data/output',
     // TODO: Can probably remove this
-    jsonRedirectFile: 'test_data/redirects/legacy_redirects.json',
-    ksuidMatcherFile: 'test_data/redirects/ksuid-matcher-file.json',
+    // jsonRedirectFile: 'test_data/redirects/legacy_redirects.json',
+    // ksuidMatcherFile: 'test_data/redirects/ksuid-matcher-file.json',
     legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
     legacySlugRedirectOutputFile:
       'test_data/redirects/legacy-slug-redirects.json',
@@ -54,15 +54,17 @@ const config = {
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
     outputDir: '/Users/alans/workshop/alanwsmith.com/_posts',
-    jsonRedirectFile:
-      '/Users/alans/workshop/alanwsmith.com/data/legacy_redirects.json',
-    ksuidMatcherFile:
-      '/Users/alans/workshop/alanwsmith.com/data/ksuid-matcher.json',
+    //jsonRedirectFile:
+    // '/Users/alans/workshop/alanwsmith.com/data/legacy_redirects.json',
+    // ksuidMatcherFile:
+    // '/Users/alans/workshop/alanwsmith.com/data/ksuid-matcher.json',
     legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
+    legacySlugRedirectOutputFile:
+      '/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
   },
 }
 
-const currentEnv = 'dev'
+const currentEnv = 'prod'
 
 // Setup counter to sanity check files
 const fileCounts = {

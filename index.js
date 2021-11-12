@@ -50,6 +50,8 @@ const config = {
     // ksuidRedirectsInputFile: '',
     //ksuidRedirectsOutputFile: '',
     // legacySlugsRedirectIdsInputFile: 'old_data/legacy-slug-redirect-ids.json',
+    legacyRedirectMiddlewareFile:
+      'test_data/redirects/legacy-redirect-middleware.js',
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
@@ -59,8 +61,10 @@ const config = {
     // ksuidMatcherFile:
     // '/Users/alans/workshop/alanwsmith.com/data/ksuid-matcher.json',
     legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
-    legacySlugRedirectOutputFile:
-      '/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
+    legacyRedirectMiddlewareContents:
+      '/Users/alans/workshop/alanwsmith.com/pages/_middleware.js',
+    // legacySlugRedirectOutputFile:
+    //'/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
   },
 }
 
@@ -217,10 +221,31 @@ console.log(
   `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
 )
 
+// Write out the to level _middleware file to redirect legacy URLs
+const legacyRedirectMiddlewareContents = `
+import { NextResponse, NextFetchEvent, NextRequest } from 'next/server'
+
+export function middleware(req) {
+  const currentSlugs = ${JSON.stringify(legacyUrlSlugToKSUIDMap, null, 2)}
+
+  const pathParts = req.nextUrl.pathname.split('/')
+  if (pathParts.length === 2) {
+    if (currentSlugs[pathParts[1]]) {
+      return NextResponse.redirect(currentSlugs[pathParts[1]])
+    }
+  }
+}
+`
+
 fs.writeFileSync(
-  config[currentEnv].legacySlugRedirectOutputFile,
-  JSON.stringify(legacyUrlSlugToKSUIDMap, null, 2)
+  config[currentEnv].legacyRedirectMiddlewareFile,
+  legacyRedirectMiddlewareContents
 )
+
+// fs.writeFileSync(
+//   config[currentEnv].legacySlugRedirectOutputFile,
+//   JSON.stringify(legacyUrlSlugToKSUIDMap, null, 2)
+// )
 
 // console.log(legacyUrlSlugToKSUIDMap)
 
@@ -256,7 +281,7 @@ fs.writeFileSync(
 // ID.
 
 /// This is the matcher that you might need to add back in
-// const ksuidMatcher = {}
+// const tsuidMatcher = {}
 // for (const ksuid in ksuidRedirects.ksuid_redirects) {
 //   const pathParts =
 //     ksuidRedirects.ksuid_redirects[ksuid].current_slug.split('/')

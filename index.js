@@ -61,7 +61,7 @@ const config = {
     // ksuidMatcherFile:
     // '/Users/alans/workshop/alanwsmith.com/data/ksuid-matcher.json',
     legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
-    legacyRedirectMiddlewareContents:
+    legacyRedirectMiddlewareFile:
       '/Users/alans/workshop/alanwsmith.com/pages/_middleware.js',
     // legacySlugRedirectOutputFile:
     //'/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',

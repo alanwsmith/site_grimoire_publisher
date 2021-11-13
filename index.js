@@ -55,7 +55,7 @@ const config = {
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
-    outputDir: '/Users/alans/workshop/alanwsmith.com/_posts',
+    outputDir: '/Users/alans/workshop/alanwsmith.com/data/_posts',
     //jsonRedirectFile:
     // '/Users/alans/workshop/alanwsmith.com/data/legacy_redirects.json',
     // ksuidMatcherFile:
@@ -83,7 +83,7 @@ const fileCounts = {
 const legacySlugMap = JSON.parse(
   fs.readFileSync(config[currentEnv].legacySlugMapFile)
 )
-console.log(legacySlugMap)
+// console.log(legacySlugMap)
 
 // // generate the new format for the map of legacy
 // // url slugs to ksuids. This can be removed once the
@@ -118,6 +118,19 @@ const files = fs.readdirSync(config[currentEnv].inputDir)
 ////////////////////////////////////////////
 // Holder for the legacy slug url to new ksuid map
 const legacyUrlSlugToKSUIDMap = {}
+
+/////////////////////////////////////////////////
+// Clear existing files
+
+const filesToClear = fs.readdirSync(config[currentEnv].outputDir)
+
+filesToClear.forEach((fileToClear) => {
+  const pathToClear = `${config[currentEnv].outputDir}/${fileToClear}`
+  console.log(`Clearing: ${pathToClear}`)
+  fs.unlinkSync(pathToClear)
+})
+
+// process.exit()
 
 /////////////////////////////////////////////
 // Loop through all the files in the grimoire

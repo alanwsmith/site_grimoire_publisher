@@ -52,6 +52,8 @@ const config = {
     // legacySlugsRedirectIdsInputFile: 'old_data/legacy-slug-redirect-ids.json',
     legacyRedirectMiddlewareFile:
       'test_data/redirects/legacy-redirect-middleware.js',
+    activeRedictMiddlewereFile:
+      'test_data/redirects/active-redirect-middleware.js',
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
@@ -65,6 +67,8 @@ const config = {
       '/Users/alans/workshop/alanwsmith.com/pages/_middleware.js',
     // legacySlugRedirectOutputFile:
     //'/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
+    activeRedictMiddlewereFile:
+      '/Users/alans/workshop/alanwsmith.com/pages/posts/_middleware.js',
   },
 }
 
@@ -132,6 +136,10 @@ filesToClear.forEach((fileToClear) => {
 
 // process.exit()
 
+///////////////////////////////////////////////
+// variable to hold data for active redirect middleware
+const activeUrlSlugRedirects = {}
+
 /////////////////////////////////////////////
 // Loop through all the files in the grimoire
 files.forEach((filename) => {
@@ -139,7 +147,15 @@ files.forEach((filename) => {
   if (filename.match(file_extension)) {
     fileCounts.total += 1
     const inputPath = `${config[currentEnv].inputDir}/${filename}`
-    const parts = matter.read(inputPath)
+
+    let parts = ''
+
+    try {
+      parts = matter.read(inputPath)
+    } catch (err) {
+      console.log(err)
+      console.log(`In file: ${filename}`)
+    }
 
     // TODO Figure out what happens if there's no data returned.
 
@@ -174,6 +190,9 @@ files.forEach((filename) => {
 
       // this is what's used in the referencing
       const urlSlug = `/posts/${baseSlug}`
+
+      // Add the mapping to the active slugs
+      activeUrlSlugRedirects[parts.data.id] = urlSlug
 
       // Add the mapping for the legacy URL
       if (legacySlugMap[parts.data.id]) {
@@ -230,11 +249,38 @@ files.forEach((filename) => {
   }
 })
 
-console.log(
-  `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
+// Write out to the posts level active id to slug redirect:
+const activeUrlSlugRedirectContent = `
+import { NextResponse, NextFetchEvent, NextRequest } from 'next/server'
+
+export function middleware(req) {
+  console.log(req.nextUrl.pathname)
+
+  const currentSlugs = ${JSON.stringify(activeUrlSlugRedirects, null, 2)}
+
+  const pathParts = req.nextUrl.pathname.split('/')
+  if (pathParts.length === 3) {
+    const slugParts = pathParts[2].split('--')
+    console.log(slugParts[0])
+    if (currentSlugs[slugParts[0]]) {
+      if (currentSlugs[slugParts[0]] !== req.nextUrl.pathname) {
+        return NextResponse.redirect(currentSlugs[slugParts[0]])
+      }
+    }
+  }
+
+  if (req.nextUrl.pathname === '/posts/asdfasdf') {
+    return NextResponse.redirect('/')
+  }
+}
+`
+
+fs.writeFileSync(
+  config[currentEnv].activeRedictMiddlewereFile,
+  activeUrlSlugRedirectContent
 )
 
-// Write out the to level _middleware file to redirect legacy URLs
+// Write out the to top level _middleware file to redirect legacy URLs
 const legacyRedirectMiddlewareContents = `
 import { NextResponse, NextFetchEvent, NextRequest } from 'next/server'
 
@@ -253,6 +299,10 @@ export function middleware(req) {
 fs.writeFileSync(
   config[currentEnv].legacyRedirectMiddlewareFile,
   legacyRedirectMiddlewareContents
+)
+
+console.log(
+  `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
 )
 
 // fs.writeFileSync(

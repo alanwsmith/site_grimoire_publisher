@@ -264,16 +264,51 @@ files.forEach((filename) => {
   }
 })
 
-const redirectLines = []
-for (const redirectSet in legacyUrlSlugToKSUIDMap) {
-  redirectLines.push(
-    `/${redirectSet}    ${legacyUrlSlugToKSUIDMap[redirectSet]}    301`
-  )
+// const redirectLines = []
+// for (const redirectSet in legacyUrlSlugToKSUIDMap) {
+//   redirectLines.push(
+//     `/${redirectSet}    ${legacyUrlSlugToKSUIDMap[redirectSet]}    301`
+//   )
+// }
+
+//////////////////////////////////////////////////////////
+// write out the data storage file
+
+fs.writeFileSync(
+  config[currentEnv].ksuidRedirectsOutputFile,
+  JSON.stringify(ksuidRedirects, null, 2)
+)
+
+//////////////////////////////////////////////////////////
+// Generate the redirects file itself.
+
+const redirectsOutputArray = []
+
+for (const ksuid in ksuidRedirects.ksuid_redirects) {
+  ksuidRedirects.ksuid_redirects[ksuid].slugs_to_redirect.forEach((slug) => {
+    const redirectLine = `${slug}    ${ksuidRedirects.ksuid_redirects[ksuid].current_slug}    301`
+    redirectsOutputArray.push(redirectLine)
+  })
 }
 
-console.log(redirectLines)
+fs.writeFileSync(
+  config[currentEnv].redirectsFile,
+  redirectsOutputArray.join('\n')
+)
 
-fs.writeFileSync(config[currentEnv].redirectsFile, redirectLines.join('\n'))
+///////////////////////////////////////////////////////////
+// Sanity check numbers
+
+console.log(
+  `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
+)
+
+//////////////////////////////////////////////
+// // This was the original (or third?) redirct direct to
+// // netlify .next/_redirects for the final location.
+// // const redirectArray = []
+// console.log(redirectLines)
+// fs.writeFileSync(config[currentEnv].redirectsFile, redirectLines.join('\n'))
 
 /////////////////////////////////////////////////////////////////////
 //// Write out to the posts level middlesware active id to slug redirect:
@@ -324,10 +359,6 @@ fs.writeFileSync(config[currentEnv].redirectsFile, redirectLines.join('\n'))
 //   legacyRedirectMiddlewareContents
 // )
 
-console.log(
-  `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
-)
-
 // fs.writeFileSync(
 //   config[currentEnv].legacySlugRedirectOutputFile,
 //   JSON.stringify(legacyUrlSlugToKSUIDMap, null, 2)
@@ -338,13 +369,6 @@ console.log(
 // shouldn't need this any more when you have hte
 // json setup for the pages/posts/_middleware
 // // Write out the redirects storage
-
-fs.writeFileSync(
-  config[currentEnv].ksuidRedirectsOutputFile,
-  JSON.stringify(ksuidRedirects, null, 2)
-)
-
-// const redirectArray = []
 
 // This is the one off file that needs to setup for the first load
 // once things are all in place, it should be removed.

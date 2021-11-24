@@ -33,9 +33,6 @@ const file_extension = /\.txt$/
 const prefixRegex = /^\w+-\s+/g
 const slugRegex = /[^\w\s]/g
 
-// const ksuidRedirects = JSON.parse(fs.readFileSync(ksuidRedirectsInputFile))
-// console.log(ksuidRedirects)
-
 // Define the configuration
 const config = {
   dev: {
@@ -47,17 +44,18 @@ const config = {
     legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
     legacySlugRedirectOutputFile:
       'test_data/redirects/legacy-slug-redirects.json',
-    // ksuidRedirectsInputFile: '',
-    //ksuidRedirectsOutputFile: '',
+    ksuidRedirectsInputFile: 'test_data/redirects/input.json',
+    ksuidRedirectsOutputFile: 'test_data/redirects/output.json',
     // legacySlugsRedirectIdsInputFile: 'old_data/legacy-slug-redirect-ids.json',
     legacyRedirectMiddlewareFile:
       'test_data/redirects/legacy-redirect-middleware.js',
     activeRedictMiddlewereFile:
       'test_data/redirects/active-redirect-middleware.js',
+    redirectsFile: 'test_data/redirects/_redirects',
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
-    outputDir: '/Users/alans/workshop/alanwsmith.com/data/_posts',
+    outputDir: '/Users/alans/workshop/alanwsmith.com/_posts',
     //jsonRedirectFile:
     // '/Users/alans/workshop/alanwsmith.com/data/legacy_redirects.json',
     // ksuidMatcherFile:
@@ -69,10 +67,18 @@ const config = {
     //'/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
     activeRedictMiddlewereFile:
       '/Users/alans/workshop/alanwsmith.com/pages/posts/_middleware.js',
+    redirectsFile: '/Users/alans/workshop/alanwsmith.com/_redirects',
+    ksuidRedirectsInputFile:
+      '/Users/alans/workshop/alanwsmith.com/_ksuid_redirects.json',
+    ksuidRedirectsOutputFile:
+      '/Users/alans/workshop/alanwsmith.com/_ksuid_redirects.json',
   },
 }
 
-const currentEnv = 'prod'
+/////////////////////////////////////////////////////////////
+// Set the environment
+//
+const currentEnv = 'dev'
 
 // Setup counter to sanity check files
 const fileCounts = {
@@ -80,6 +86,15 @@ const fileCounts = {
   containsId: 0,
   confirmedStatus: 0,
 }
+
+//////////////////////////////////////////
+// Load the ksuidRedirects which deal with slug names changes
+
+const ksuidRedirects = JSON.parse(
+  fs.readFileSync(config[currentEnv].ksuidRedirectsInputFile)
+)
+console.log(ksuidRedirects)
+// process.exit()
 
 //////////////////////////////////////////
 // Load in the list of legacy slugs and their matching KSUIDs
@@ -218,24 +233,24 @@ files.forEach((filename) => {
           // console.log(`Wrote: ${outputPath}`)
         })
 
-        // // Add the page to the redirects file if it's new
-        // if (ksuidRedirects.ksuid_redirects[parts.data.id] === undefined) {
-        //   ksuidRedirects.ksuid_redirects[parts.data.id] = {
-        //     current_slug: urlSlug,
-        //     slugs_to_redirect: [],
-        //   }
-        // }
+        // Add the page to the redirects file if it's new
+        if (ksuidRedirects.ksuid_redirects[parts.data.id] === undefined) {
+          ksuidRedirects.ksuid_redirects[parts.data.id] = {
+            current_slug: urlSlug,
+            slugs_to_redirect: [],
+          }
+        }
 
-        // // Update if it's changed and push the prior onto the list of
-        // // slugs to redicts
-        // else if (
-        //   ksuidRedirects.ksuid_redirects[parts.data.id].current_slug !== urlSlug
-        // ) {
-        //   ksuidRedirects.ksuid_redirects[parts.data.id].slugs_to_redirect.push(
-        //     ksuidRedirects.ksuid_redirects[parts.data.id].current_slug
-        //   )
-        //   ksuidRedirects.ksuid_redirects[parts.data.id].current_slug = urlSlug
-        // }
+        // Update if it's changed and push the prior onto the list of
+        // slugs to redicts
+        else if (
+          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug !== urlSlug
+        ) {
+          ksuidRedirects.ksuid_redirects[parts.data.id].slugs_to_redirect.push(
+            ksuidRedirects.ksuid_redirects[parts.data.id].current_slug
+          )
+          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug = urlSlug
+        }
 
         // make an object that holds all the necessary redirects
 
@@ -249,57 +264,65 @@ files.forEach((filename) => {
   }
 })
 
-// Write out to the posts level active id to slug redirect:
-const activeUrlSlugRedirectContent = `
-import { NextResponse, NextFetchEvent, NextRequest } from 'next/server'
-
-export function middleware(req) {
-  console.log(req.nextUrl.pathname)
-
-  const currentSlugs = ${JSON.stringify(activeUrlSlugRedirects, null, 2)}
-
-  const pathParts = req.nextUrl.pathname.split('/')
-  if (pathParts.length === 3) {
-    const slugParts = pathParts[2].split('--')
-    console.log(slugParts[0])
-    if (currentSlugs[slugParts[0]]) {
-      if (currentSlugs[slugParts[0]] !== req.nextUrl.pathname) {
-        return NextResponse.redirect(currentSlugs[slugParts[0]])
-      }
-    }
-  }
-
-  if (req.nextUrl.pathname === '/posts/asdfasdf') {
-    return NextResponse.redirect('/')
-  }
+const redirectLines = []
+for (const redirectSet in legacyUrlSlugToKSUIDMap) {
+  redirectLines.push(
+    `/${redirectSet}    ${legacyUrlSlugToKSUIDMap[redirectSet]}    301`
+  )
 }
-`
 
-fs.writeFileSync(
-  config[currentEnv].activeRedictMiddlewereFile,
-  activeUrlSlugRedirectContent
-)
+console.log(redirectLines)
 
-// Write out the to top level _middleware file to redirect legacy URLs
-const legacyRedirectMiddlewareContents = `
-import { NextResponse, NextFetchEvent, NextRequest } from 'next/server'
+fs.writeFileSync(config[currentEnv].redirectsFile, redirectLines.join('\n'))
 
-export function middleware(req) {
-  const currentSlugs = ${JSON.stringify(legacyUrlSlugToKSUIDMap, null, 2)}
+/////////////////////////////////////////////////////////////////////
+//// Write out to the posts level middlesware active id to slug redirect:
+//const activeUrlSlugRedirectContent = `
+//import { NextResponse, NextFetchEvent, NextRequest } from 'next/server'
+//export function middleware(req) {
+//  console.log(req.nextUrl.pathname)
+//  const currentSlugs = ${JSON.stringify(activeUrlSlugRedirects, null, 2)}
+//  const pathParts = req.nextUrl.pathname.split('/')
+//  if (pathParts.length === 3) {
+//    const slugParts = pathParts[2].split('--')
+//    console.log(slugParts[0])
+//    if (currentSlugs[slugParts[0]]) {
+//      if (currentSlugs[slugParts[0]] !== req.nextUrl.pathname) {
+//        return NextResponse.redirect(currentSlugs[slugParts[0]])
+//      }
+//    }
+//  }
+//  if (req.nextUrl.pathname === '/posts/asdfasdf') {
+//    return NextResponse.redirect('/')
+//  }
+//}
+//`
+//fs.writeFileSync(
+//  config[currentEnv].activeRedictMiddlewereFile,
+//  activeUrlSlugRedirectContent
+//)
 
-  const pathParts = req.nextUrl.pathname.split('/')
-  if (pathParts.length === 2) {
-    if (currentSlugs[pathParts[1]]) {
-      return NextResponse.redirect(currentSlugs[pathParts[1]])
-    }
-  }
-}
-`
-
-fs.writeFileSync(
-  config[currentEnv].legacyRedirectMiddlewareFile,
-  legacyRedirectMiddlewareContents
-)
+///////////////////////////////////////////////////////////////////
+// // Write out the to top level _middleware file to redirect legacy URLs
+// const legacyRedirectMiddlewareContents = `
+// import { NextResponse, NextFetchEvent, NextRequest } from 'next/server'
+// export function middleware(req) {
+//   console.log("-- Top level _middleware: Started")
+//   console.log("-- Top level _middleware: Initial path: " + req.nextUrl.pathname)
+//   const currentSlugs = ${JSON.stringify(legacyUrlSlugToKSUIDMap, null, 2)}
+//   const pathParts = req.nextUrl.pathname.split('/')
+//   if (pathParts.length === 2) {
+//     if (currentSlugs[pathParts[1]]) {
+//       console.log('-- Top level _middleware Redirecting to: ' + currentSlugs[pathParts[1]])
+//       return NextResponse.redirect(currentSlugs[pathParts[1]])
+//     }
+//   }
+// }
+// `
+// fs.writeFileSync(
+//   config[currentEnv].legacyRedirectMiddlewareFile,
+//   legacyRedirectMiddlewareContents
+// )
 
 console.log(
   `Total: ${fileCounts.total} - IDs: ${fileCounts.containsId} - Published: ${fileCounts.confirmedStatus}`
@@ -315,10 +338,11 @@ console.log(
 // shouldn't need this any more when you have hte
 // json setup for the pages/posts/_middleware
 // // Write out the redirects storage
-// fs.writeFileSync(
-//   ksuidRedirectsOutputFile,
-//   JSON.stringify(ksuidRedirects, null, 2)
-// )
+
+fs.writeFileSync(
+  config[currentEnv].ksuidRedirectsOutputFile,
+  JSON.stringify(ksuidRedirects, null, 2)
+)
 
 // const redirectArray = []
 

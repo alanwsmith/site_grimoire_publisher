@@ -67,18 +67,18 @@ const config = {
     //'/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
     activeRedictMiddlewereFile:
       '/Users/alans/workshop/alanwsmith.com/pages/posts/_middleware.js',
-    redirectsFile: '/Users/alans/workshop/alanwsmith.com/_redirects',
+    redirectsFile: '/Users/alans/workshop/alanwsmith.com/_data/_redirects',
     ksuidRedirectsInputFile:
-      '/Users/alans/workshop/alanwsmith.com/_ksuid_redirects.json',
+      '/Users/alans/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
     ksuidRedirectsOutputFile:
-      '/Users/alans/workshop/alanwsmith.com/_ksuid_redirects.json',
+      '/Users/alans/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
   },
 }
 
 /////////////////////////////////////////////////////////////
 // Set the environment
 //
-const currentEnv = 'dev'
+const currentEnv = 'prod'
 
 // Setup counter to sanity check files
 const fileCounts = {

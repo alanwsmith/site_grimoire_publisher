@@ -1,0 +1,25 @@
+{
+  "ksuid_redirects": {
+    "20eLG89zSnmm": {
+      "current_slug": "/first-post-yeah-yeah",
+      "slugs_to_redirect": []
+    },
+    "20eLGDcxpBhK": {
+      "current_slug": "/posts/20eLGDcxpBhK--jake-as-jake--a-review",
+      "slugs_to_redirect": [
+        "/prior-thing",
+        "/jack-as-jake"
+      ]
+    },
+    "20eOCGsLb6si": {
+      "current_slug": "/posts/20eOCGsLb6si--join-a-table-into-a-string-in-lua",
+      "slugs_to_redirect": [
+        "/posts/20eOCGsLb6si--THIS-IS-OLD-AND-SHOULD-MOVE"
+      ]
+    },
+    "20eMJEMIINBl": {
+      "current_slug": "/posts/20eMJEMIINBl--200000",
+      "slugs_to_redirect": []
+    }
+  }
+}

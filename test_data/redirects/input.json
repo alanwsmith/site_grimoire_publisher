@@ -1,0 +1,16 @@
+{
+  "ksuid_redirects": {
+    "20eLG89zSnmm": {
+      "current_slug": "/first-post-yeah-yeah",
+      "slugs_to_redirect": []
+    },
+    "20eLGDcxpBhK": {
+      "current_slug": "/jack-as-jake",
+      "slugs_to_redirect": ["/prior-thing"]
+    },
+    "20eOCGsLb6si": {
+      "current_slug": "/posts/20eOCGsLb6si--THIS-IS-OLD-AND-SHOULD-MOVE",
+      "slugs_to_redirect": []
+    }
+  }
+}

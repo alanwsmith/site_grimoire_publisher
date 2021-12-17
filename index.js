@@ -6,7 +6,12 @@
 //
 // There's a good chance lots of this code can be removed.
 // Just need to walk through it to figure out what's what.
+//
+//
+// TODO: Make sure to explicty filter out work stuff too
+//// as a secondary protection.
 
+const axios = require('axios')
 const fs = require('fs')
 const matter = require('gray-matter')
 
@@ -32,6 +37,7 @@ const config = {
       'test_data/redirects/active-redirect-middleware.js',
     redirectsFile: 'test_data/redirects/_redirects',
     imageFile: 'test_data/components/Img.js',
+    podcastRssOutputPath: 'test_data/thepodofalan.xml',
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
@@ -51,6 +57,8 @@ const config = {
     ksuidRedirectsOutputFile:
       '/Users/alans/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
     imageFile: '/Users/alans/workshop/alanwsmith.com/components/Img.js',
+    podcastRssOutputPath:
+      '/Users/alans/workshop/alanwsmith.com/public/thepodofalan.xml',
   },
 }
 
@@ -274,3 +282,33 @@ fs.appendFileSync(
   config[currentEnv].imageFile,
   `}\n\nexport default function Img({ src, alt = 'image alt text unavailable' }) { \n return <Image src={imgMap[src]} alt={alt} /> \n}`
 )
+
+/////////////////////////////////////////////////////////////
+// Copy down ThePodOfAlan RSS feed and scrub it
+
+console.log('Getting podcast RSS feed...')
+
+axios
+  .get('https://feeds.simplecast.com/xLr7FvDj')
+  .then((response) => {
+    console.log('Got feed...')
+    const originalText = response.data
+    const newText1 = originalText.replace(
+      '<atom:link href="https://simplecast.superfeedr.com/" rel="hub" xmlns="http://www.w3.org/2005/Atom"/>',
+      ''
+    )
+    const newText2 = newText1.replace(
+      '<generator>https://simplecast.com</generator>',
+      ''
+    )
+    const split1 = newText2.split('https://feeds.simplecast.com/xLr7FvDj')
+    const join1 = split1.join('https://www.alanwsmith.com/thepodofalan.xml')
+    const split2 = join1.split(`podcast@alanwsmith.com (Alan W. Smith)`)
+    const join2 = split2.join('Alan W. Smith')
+
+    console.log('Writing out scrubbed podcast feed...')
+    fs.writeFileSync(config[currentEnv].podcastRssOutputPath, join2)
+  })
+  .catch((error) => {
+    console.error(error)
+  })

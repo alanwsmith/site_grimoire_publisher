@@ -227,6 +227,9 @@ fs.writeFileSync(
 const redirectsOutputArray = []
 
 for (const ksuid in ksuidRedirects.ksuid_redirects) {
+  const genericRedirect = `/posts/${ksuid}    ${ksuidRedirects.ksuid_redirects[ksuid].current_slug}    301`
+  redirectsOutputArray.push(genericRedirect)
+
   ksuidRedirects.ksuid_redirects[ksuid].slugs_to_redirect.forEach((slug) => {
     const redirectLine = `${slug}    ${ksuidRedirects.ksuid_redirects[ksuid].current_slug}    301`
     redirectsOutputArray.push(redirectLine)

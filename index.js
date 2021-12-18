@@ -86,9 +86,9 @@ console.log(ksuidRedirects)
 //////////////////////////////////////////
 // Load in the list of legacy slugs and their matching KSUIDs
 
-const legacySlugMap = JSON.parse(
-  fs.readFileSync(config[currentEnv].legacySlugMapFile)
-)
+// const legacySlugMap = JSON.parse(
+//   fs.readFileSync(config[currentEnv].legacySlugMapFile)
+// )
 
 ///////////////////////////////////////////////
 // Get the files - this is the full list from the grimoire
@@ -136,8 +136,9 @@ files.forEach((filename) => {
 
     // Only process if there's an id
     if (parts.data.id) {
+      const lowercaseId = parts.data.id.toLowerCase()
       fileCounts.containsId += 1
-      console.log(`-- Found ID: ${parts.data.id}`)
+      console.log(`-- Found ID: ${lowercaseId}`)
 
       // Update the title frontmatter if one
       // doesn't already exist (which it shouldn't
@@ -147,6 +148,7 @@ files.forEach((filename) => {
       if (!parts.data.title) {
         parts.data.title = filename
           .replaceAll(prefixRegex, '')
+          // TODO - Remove trailing spaces here
           .replaceAll('.txt', '')
       }
 
@@ -154,7 +156,7 @@ files.forEach((filename) => {
       // that has just been updated or has an override
       // in it.
       const baseSlug =
-        parts.data.id +
+        lowercaseId +
         `--` +
         parts.data.title
           .replaceAll(prefixRegex, '')
@@ -166,12 +168,13 @@ files.forEach((filename) => {
       const urlSlug = `/posts/${baseSlug}`
 
       // Add the mapping to the active slugs
-      activeUrlSlugRedirects[parts.data.id] = urlSlug
+      activeUrlSlugRedirects[lowercaseId] = urlSlug
 
       // Add the mapping for the legacy URL
-      if (legacySlugMap[parts.data.id]) {
-        legacyUrlSlugToKSUIDMap[legacySlugMap[parts.data.id]] = urlSlug
-      }
+      // This should no longer be needed after the first run (i think...)
+      // if (legacySlugMap[lowercaseId]) {
+      // legacyUrlSlugToKSUIDMap[legacySlugMap[lowercaseId]] = urlSlug
+      // }
 
       // Create the output path an assembe the file
       const outputPath = `${config[currentEnv].outputDir}/${baseSlug}.mdx`
@@ -188,8 +191,8 @@ files.forEach((filename) => {
         })
 
         // Add the page to the redirects file if it's new
-        if (ksuidRedirects.ksuid_redirects[parts.data.id] === undefined) {
-          ksuidRedirects.ksuid_redirects[parts.data.id] = {
+        if (ksuidRedirects.ksuid_redirects[lowercaseId] === undefined) {
+          ksuidRedirects.ksuid_redirects[lowercaseId] = {
             current_slug: urlSlug,
             slugs_to_redirect: [],
           }
@@ -198,12 +201,12 @@ files.forEach((filename) => {
         // Update if it's changed and push the prior onto the list of
         // slugs to redicts
         else if (
-          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug !== urlSlug
+          ksuidRedirects.ksuid_redirects[lowercaseId].current_slug !== urlSlug
         ) {
-          ksuidRedirects.ksuid_redirects[parts.data.id].slugs_to_redirect.push(
-            ksuidRedirects.ksuid_redirects[parts.data.id].current_slug
+          ksuidRedirects.ksuid_redirects[lowercaseId].slugs_to_redirect.push(
+            ksuidRedirects.ksuid_redirects[lowercaseId].current_slug
           )
-          ksuidRedirects.ksuid_redirects[parts.data.id].current_slug = urlSlug
+          ksuidRedirects.ksuid_redirects[lowercaseId].current_slug = urlSlug
         }
       }
     }
@@ -292,22 +295,30 @@ axios
   .get('https://feeds.simplecast.com/xLr7FvDj')
   .then((response) => {
     console.log('Got feed...')
-    const originalText = response.data
-    const newText1 = originalText.replace(
+    let feedXML = response.data
+    feedXML = feedXML.replace(
       '<atom:link href="https://simplecast.superfeedr.com/" rel="hub" xmlns="http://www.w3.org/2005/Atom"/>',
       ''
     )
-    const newText2 = newText1.replace(
+    feedXML = feedXML.replace(
       '<generator>https://simplecast.com</generator>',
       ''
     )
-    const split1 = newText2.split('https://feeds.simplecast.com/xLr7FvDj')
-    const join1 = split1.join('https://www.alanwsmith.com/thepodofalan.xml')
-    const split2 = join1.split(`podcast@alanwsmith.com (Alan W. Smith)`)
-    const join2 = split2.join('Alan W. Smith')
+    feedXML = feedXML.replace('<googleplay:block>yes</googleplay:block>', '')
+    feedXML = feedXML.replace('<itunes:block>yes</itunes:block>', '')
+    feedXML = feedXML.replace(
+      '<meta content="noindex" name="robots" xmlns:atom="http://www.w3.org/2005/Atom"/>',
+      ''
+    )
+    feedXML = feedXML
+      .split('"https://feeds.simplecast.com/xLr7FvDj"')
+      .join('"https://www.alanwsmith.com/thepodofalan.xml"')
+    feedXML = feedXML
+      .split(`podcast@alanwsmith.com (Alan W. Smith)`)
+      .join('Alan W. Smith')
 
     console.log('Writing out scrubbed podcast feed...')
-    fs.writeFileSync(config[currentEnv].podcastRssOutputPath, join2)
+    fs.writeFileSync(config[currentEnv].podcastRssOutputPath, feedXML)
   })
   .catch((error) => {
     console.error(error)

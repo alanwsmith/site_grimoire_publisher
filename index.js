@@ -37,7 +37,10 @@ const config = {
       'test_data/redirects/active-redirect-middleware.js',
     redirectsFile: 'test_data/redirects/_redirects',
     imageFile: 'test_data/components/Img.js',
+    // The first path is the main one, the second is to try to get google
+    // to work.
     podcastRssOutputPath: 'test_data/thepodofalan.xml',
+    podcastRssOutputPathGoogle: 'test_data/thepodofalan-google.xml',
   },
   prod: {
     inputDir: '/Users/alans/Dropbox/grimoire',
@@ -57,8 +60,12 @@ const config = {
     ksuidRedirectsOutputFile:
       '/Users/alans/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
     imageFile: '/Users/alans/workshop/alanwsmith.com/components/Img.js',
+    // The first path is the main one, the second is to try to get google
+    // to work.
     podcastRssOutputPath:
       '/Users/alans/workshop/alanwsmith.com/public/thepodofalan.xml',
+    podcastRssOutputPathGoogle:
+      '/Users/alans/workshop/alanwsmith.com/public/thepodofalan-google.xml',
   },
 }
 
@@ -314,14 +321,25 @@ axios
       ''
     )
     feedXML = feedXML
-      .split('"https://feeds.simplecast.com/xLr7FvDj"')
-      .join('"https://www.alanwsmith.com/thepodofalan.xml"')
-    feedXML = feedXML
       .split(`podcast@alanwsmith.com (Alan W. Smith)`)
       .join('Alan W. Smith')
 
-    console.log('Writing out scrubbed podcast feed...')
-    fs.writeFileSync(config[currentEnv].podcastRssOutputPath, feedXML)
+    // Output the main file
+    mainOutput = feedXML
+      .split('"https://feeds.simplecast.com/xLr7FvDj"')
+      .join('"https://www.alanwsmith.com/thepodofalan.xml"')
+    console.log('Writing out main scrubbed podcast feed...')
+    fs.writeFileSync(config[currentEnv].podcastRssOutputPath, mainOutput)
+
+    // Output the google version of the file
+    googleOutput = feedXML
+      .split('"https://feeds.simplecast.com/xLr7FvDj"')
+      .join('"https://www.alanwsmith.com/thepodofalan-google.xml"')
+    console.log('Writing out google scrubbed podcast feed...')
+    fs.writeFileSync(
+      config[currentEnv].podcastRssOutputPathGoogle,
+      googleOutput
+    )
   })
   .catch((error) => {
     console.error(error)

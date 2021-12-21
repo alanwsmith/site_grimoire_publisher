@@ -210,15 +210,39 @@ files.forEach((filename) => {
         else if (
           ksuidRedirects.ksuid_redirects[lowercaseId].current_slug !== urlSlug
         ) {
-          ksuidRedirects.ksuid_redirects[lowercaseId].slugs_to_redirect.push(
-            ksuidRedirects.ksuid_redirects[lowercaseId].current_slug
-          )
-          ksuidRedirects.ksuid_redirects[lowercaseId].current_slug = urlSlug
+          if (
+            !ksuidRedirects.ksuid_redirects[
+              lowercaseId
+            ].slugs_to_redirect.includes(urlSlug)
+          ) {
+            ksuidRedirects.ksuid_redirects[lowercaseId].slugs_to_redirect.push(
+              ksuidRedirects.ksuid_redirects[lowercaseId].current_slug
+            )
+            ksuidRedirects.ksuid_redirects[lowercaseId].current_slug = urlSlug
+          }
         }
       }
     }
   }
 })
+
+//////////////////////////////////////////////////////////
+// Make sure redirects aren't pointing to themselves.
+
+for (const urlKey in ksuidRedirects.ksuid_redirects) {
+  const currentSlug = ksuidRedirects.ksuid_redirects[urlKey].current_slug
+  const indexOfInfiniteRedirect =
+    ksuidRedirects.ksuid_redirects[urlKey].slugs_to_redirect.indexOf(
+      currentSlug
+    )
+  if (indexOfInfiniteRedirect > -1) {
+    console.log(`- Killing Infinite Redirect: ${currentSlug}`)
+    ksuidRedirects.ksuid_redirects[urlKey].slugs_to_redirect.splice(
+      indexOfInfiniteRedirect,
+      1
+    )
+  }
+}
 
 //////////////////////////////////////////////////////////
 // write out the data storage file

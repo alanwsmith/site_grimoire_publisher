@@ -174,6 +174,10 @@ files.forEach((filename) => {
       // this is what's used in the referencing
       const urlSlug = `/posts/${baseSlug}`
 
+      // add the slug to the frontmatter so it can be used
+      // in the og:url
+      parts.data.slug = urlSlug
+
       // Add the mapping to the active slugs
       activeUrlSlugRedirects[lowercaseId] = urlSlug
 

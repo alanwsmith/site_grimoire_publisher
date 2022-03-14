@@ -43,29 +43,29 @@ const config = {
     podcastRssOutputPathGoogle: 'test_data/thepodofalan-google.xml',
   },
   prod: {
-    inputDir: '/Users/alans/Dropbox/grimoire',
-    outputDir: '/Users/alans/workshop/alanwsmith.com/_posts',
+    inputDir: '/Users/alan/Library/Mobile Documents/com~apple~CloudDocs/Grimoire',
+    outputDir: '/Users/alan/workshop/alanwsmith.com/_posts',
 
     legacySlugMapFile: 'legacy-slug-to-ksuid-map.json',
     legacyRedirectMiddlewareFile:
-      '/Users/alans/workshop/alanwsmith.com/pages/_middleware.js',
+      '/Users/alan/workshop/alanwsmith.com/pages/_middleware.js',
     // legacySlugRedirectOutputFile:
-    //'/Users/alans/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
+    //'/Users/alan/workshop/alanwsmith.com/data/legacy-url-slug-to-ksuid-redirects.json',
 
     activeRedictMiddlewereFile:
-      '/Users/alans/workshop/alanwsmith.com/pages/posts/_middleware.js',
-    redirectsFile: '/Users/alans/workshop/alanwsmith.com/_data/_redirects',
+      '/Users/alan/workshop/alanwsmith.com/pages/posts/_middleware.js',
+    redirectsFile: '/Users/alan/workshop/alanwsmith.com/_data/_redirects',
     ksuidRedirectsInputFile:
-      '/Users/alans/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
+      '/Users/alan/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
     ksuidRedirectsOutputFile:
-      '/Users/alans/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
-    imageFile: '/Users/alans/workshop/alanwsmith.com/components/Img.js',
+      '/Users/alan/workshop/alanwsmith.com/_data/_ksuid_redirects.json',
+    imageFile: '/Users/alan/workshop/alanwsmith.com/components/Img.js',
     // The first path is the main one, the second is to try to get google
     // to work.
     podcastRssOutputPath:
-      '/Users/alans/workshop/alanwsmith.com/public/thepodofalan.xml',
+      '/Users/alan/workshop/alanwsmith.com/public/thepodofalan.xml',
     podcastRssOutputPathGoogle:
-      '/Users/alans/workshop/alanwsmith.com/public/thepodofalan-google.xml',
+      '/Users/alan/workshop/alanwsmith.com/public/thepodofalan-google.xml',
   },
 }
 
@@ -125,6 +125,15 @@ const activeUrlSlugRedirects = {}
 /////////////////////////////////////////////
 // Loop through all the files in the grimoire
 files.forEach((filename) => {
+  if (filename.match(/tour-/g)) {
+    return
+  }
+  if (filename.match(/data-/g)) {
+    return
+  }
+
+  // TODO: Set this up to whitelist file names
+
   // console.log(`Processing: ${filename}`)
   if (filename.match(file_extension)) {
     fileCounts.total += 1
@@ -287,7 +296,7 @@ console.log(
 // Make the images file.
 
 const image_files = fs.readdirSync(
-  '/Users/alans/workshop/alanwsmith.com/_images'
+  '/Users/alan/workshop/alanwsmith.com/_images'
 )
 
 fs.writeFileSync(
@@ -321,7 +330,7 @@ for (let image_file of image_files) {
 
 fs.appendFileSync(
   config[currentEnv].imageFile,
-  `}\n\nexport default function Img({ src, alt = 'image alt text unavailable' }) { \n return <Image src={imgMap[src]} alt={alt} /> \n}`
+  `}\n\nexport default function Img({ src, alt = 'image alt text unavailable' }) { \n const fileParts = src.split('.') \n return <Image src={imgMap[fileParts[0]]} alt={alt} /> \n}`
 )
 
 /////////////////////////////////////////////////////////////

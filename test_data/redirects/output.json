@@ -5,20 +5,25 @@
       "slugs_to_redirect": []
     },
     "20eLGDcxpBhK": {
-      "current_slug": "/posts/20eLGDcxpBhK--jake-as-jake--a-review",
+      "current_slug": "/jack-as-jake",
       "slugs_to_redirect": [
-        "/prior-thing",
-        "/jack-as-jake"
+        "/prior-thing"
       ]
     },
     "20eOCGsLb6si": {
-      "current_slug": "/posts/20eOCGsLb6si--join-a-table-into-a-string-in-lua",
-      "slugs_to_redirect": [
-        "/posts/20eOCGsLb6si--THIS-IS-OLD-AND-SHOULD-MOVE"
-      ]
+      "current_slug": "/posts/20eOCGsLb6si--THIS-IS-OLD-AND-SHOULD-MOVE",
+      "slugs_to_redirect": []
     },
-    "20eMJEMIINBl": {
-      "current_slug": "/posts/20eMJEMIINBl--200000",
+    "20eocgslb6si": {
+      "current_slug": "/posts/20eocgslb6si--join-a-table-into-a-string-in-lua",
+      "slugs_to_redirect": []
+    },
+    "20emjemiinbl": {
+      "current_slug": "/posts/20emjemiinbl--200000",
+      "slugs_to_redirect": []
+    },
+    "20elgdcxpbhk": {
+      "current_slug": "/posts/20elgdcxpbhk--jake-as-jake--a-review",
       "slugs_to_redirect": []
     }
   }
